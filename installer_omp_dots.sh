@@ -191,7 +191,7 @@ apply_theme() {
     # Get the theme path from list_themes
     local theme_path
     theme_path=$(list_themes "$1")
-    if [ -z "$theme_path" ]; then
+    if [ -z "{$theme_path}" ]; then
         echo "Error: No theme found at index $1" >&2
         return 1
     fi
@@ -199,7 +199,7 @@ apply_theme() {
     # Ensure theme_path is a valid file
     if [ ! -f "$theme_path" ]; then
         echo "Error: Theme file $theme_path does not exist" >&2
-        return 1
+        #return 1
     fi
 
     # Construct the new line for .bashrc
@@ -235,12 +235,16 @@ apply_theme() {
 }
 
 #omp_uninstaller
-#list_themes 1 "info"
+list_themes 0 "info"
+
+list_themes 2 "info"
+
+list_themes 1 "info"
 #list_themes 1
 #omp_installer
 #custom_json_install
 #list_themes 12
-apply_theme 1
+#apply_theme 1
 
 
 
