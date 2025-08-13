@@ -38,6 +38,7 @@ cmd_exists(){
     return "$?"
 }
 
+#fjjf
 install_omp(){
     if cmd_exists oh-my-posh;then
         echo "'Oh-My-Posh' is already installed, exiting"
