@@ -77,6 +77,7 @@ omp_installer() {
         echo "Themes Directory: $THEMES_DIR" >> "details.log"
         return 0
     else
+        echo "aborting 'Oh-My-Posh' installation"
         return 1
     fi
 }
@@ -174,78 +175,111 @@ omp_uninstaller() {
 }
 
 list_themes(){
-    local JSON_FILES=("$THEMES_DIR"/*.json)
+    echo "$THEME_DIR"
+    local JSON_FILES="$THEMES_DIR"/*.json
     if [ -z "${#JSON_FILES[@]}" ];then
         echo "there is no JSON files in dir: $THEMES_DIR"
     else
         local i=0
         for name in $JSON_FILES;do
             if [[ "$1" == "$i" && "$2" == "info" ]];then echo "$i. $name";return 0;fi
+            if [[ "$1" == "all" ]];then echo "$i. $name";fi
             if [[ "$1" == "$i" && -z "$2" ]];then echo "$name";return 0;fi
+            #echo "$i. $name";
             ((i++))
         done
     fi
 }
-
+list_themes_prompt(){
+    local cho
+    echo "opt: \"all\" for listing all themes"
+    echo "opt: any number for listing specific theme"
+    read -p "choose your option: " cho
+    echo "";echo "";echo "listing starts here ---";
+    if [[ "$cho" == "all" ]];then
+        list_themes "all"
+    else list_themes "$cho" "info"
+    fi
+    echo "listing ends here ---";echo ""
+}
 apply_theme() {
     # Get the theme path from list_themes
     local theme_path
-    theme_path=$(list_themes "$1")
-    if [ -z "{$theme_path}" ]; then
-        echo "Error: No theme found at index $1" >&2
-        return 1
-    fi
-
+    #theme_path=$(list_themes "$1")
+    theme_path=$(list_themes "$1" | grep -E '\.json$' | tr -d '\n')
+    
     # Ensure theme_path is a valid file
-    if [ ! -f "$theme_path" ]; then
-        echo "Error: Theme file $theme_path does not exist" >&2
-        #return 1
-    fi
-
-    # Construct the new line for .bashrc
-    local new_line="eval \"\$(oh-my-posh init bash --config $theme_path)\""
+    if [ -f "$theme_path" ]; then echo "File found"
+    else echo "Error: Theme file $theme_path does not exist" >&2;fi
 
     # Check if an oh-my-posh init line exists in .bashrc
+    #echo "|"$HOME/.bashrc"|"
     local line
     line=$(grep -E "oh-my-posh init bash --config" "$HOME/.bashrc")
+    echo "old line: |$line|"
+    local new_line
+    new_line="eval \"\$(oh-my-posh init bash --config $theme_path)\""
+    echo "new line: |$new_line|"
+    #local esc_line=$(echo "$line" | sed 's/[][\\^$.*+?{}|()/ ]/\\&/g')
+    #echo "|$esc_line|"
+    #local esc_new_line=$(echo "$new_line" | sed 's/[][\\^$.*+?{}|()/ ]/\\&/g')
+    #echo "|$esc_new_line|"
 
-    if [ ! -z "$line" ]; then
-        # Escape special characters in $line and $new_line for sed
-        local escaped_line
-        escaped_line=$(echo "$line" | sed 's/[][\\^$.*+?{}|()/]/\\&/g')
-        local escaped_new_line
-        escaped_new_line=$(echo "$new_line" | sed 's/[][\\^$.*+?{}|()/]/\\&/g')
-
-        # Use # as delimiter to avoid conflicts with / in paths
-        if sed -i "s#${escaped_line}#${escaped_new_line}#" "$HOME/.bashrc"; then
-            echo "Theme applied successfully: $theme_path"
-        else
-            echo "failed to apply" >&2
-            return 1
-        fi
+    if [[ ! "$line" == "" ]];then
+        echo changing
+        sed -i "s#$line#$new_line#" "$HOME/.bashrc";
     else
-        # Append the new line to .bashrc
-        if echo "$new_line" >> "$HOME/.bashrc"; then
-            echo "Theme applied successfully: $theme_path"
-        else
-            echo "failed to apply" >&2
-            return 1
-        fi
+        echo appending
+        echo "$new_line" >> "$HOME/.bashrc";
     fi
+}
+apply_theme_prompt(){
+    local cho
+    read -p "choose your theme with number: " cho
+    apply_theme "$cho"
+}
+
+
+menu(){
+    local info_install=""
+    local enable_info=""
+    if cmd_exists oh-my-posh;then info_install=" (installed)";else info_install=" (not installed)";fi
+    line=$(grep -E "oh-my-posh init bash --config" "$HOME/.bashrc")
+    if [[ "$line" == "" ]];then enable_info="(not enabled)"; else enable_info="(enabled)"; fi
+
+    #clear
+    echo "1. INSTALL oh-my-posh, $info_install"
+    echo "2. enable oh-my-posh on 'bash', $enable_info"
+    echo "3. LIST oh-my-posh themes"
+    echo "4. APPLY oh-my-posh theme"
+    echo "5. UNINSTALL oh-my-posh"
+
+    local cho
+    read -p "Select any option (number only): " cho
+
+      if (("$cho" == 1));then omp_installer
+    elif (("$cho" == 2));then theme_apply_default
+    elif (("$cho" == 3));then list_themes_prompt
+    elif (("$cho" == 4));then apply_theme_prompt
+    else menu; fi 
+    menu
 }
 
 #omp_uninstaller
-list_themes 0 "info"
+#list_themes "$1" "info"
 
-list_themes 2 "info"
+#list_themes 2 "info"
 
-list_themes 1 "info"
+#list_themes 1 "info"
 #list_themes 1
 #omp_installer
 #custom_json_install
 #list_themes 12
-#apply_theme 1
+#apply_theme "$1"
 
 
 
 #omp_uninstaller
+
+
+menu
