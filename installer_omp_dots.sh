@@ -56,7 +56,7 @@ install_omp(){
 
     if cmd_exists oh-my-posh;then
         echo "'Oh-My-Posh' is installed successfully"
-        custom_json_install
+        custom_json_install force
         return 0
     else
         echo "'Oh-My-Posh' installation failed"
