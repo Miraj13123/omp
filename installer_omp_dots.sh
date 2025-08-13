@@ -12,6 +12,9 @@ else
 fi
 
 INSTALL_DIR=$(cat "details.log" | grep -E "Install Directory: " | awk '{print $NF}')
+INSTALL_DIR=$(whereis oh-my-posh | awk '{sub(/^[^:]+: /, ""); sub(/\/[^/]+$/, ""); print}')
+#echo "$INSTALL_DIR"
+
 THEMES_DIR=$(cat "details.log" | grep -E "Themes Directory: " | awk '{print $NF}')
 #app="$INSTALL_DIR/oh-my-posh"
 #echo "$app"
@@ -257,7 +260,6 @@ menu(){
 
     local cho=""
     read -p "Select any option (number only): " cho
-
       if [[ "$cho" == "1" ]];then omp_installer
     elif [[ "$cho" == "2" ]];then theme_apply_default
     elif [[ "$cho" == "3" ]];then list_themes_prompt
