@@ -11,11 +11,11 @@ else
     SCRIPT_DIR="."
 fi
 
-INSTALL_DIR=$(cat "details.log" | grep -E "Install Directory: " | awk '{print $NF}')
+INSTALL_DIR=$(cat "$SCRIPT_DIR/details.log" | grep -E "Install Directory: " | awk '{print $NF}')
 INSTALL_DIR=$(whereis oh-my-posh | awk '{sub(/^[^:]+: /, ""); sub(/\/[^/]+$/, ""); print}')
 #echo "$INSTALL_DIR"
 
-THEMES_DIR=$(cat "details.log" | grep -E "Themes Directory: " | awk '{print $NF}')
+THEMES_DIR=$(cat "$SCRIPT_DIR/details.log" | grep -E "Themes Directory: " | awk '{print $NF}')
 #app="$INSTALL_DIR/oh-my-posh"
 #echo "$app"
 
@@ -38,7 +38,6 @@ cmd_exists(){
     return "$?"
 }
 
-#fjjf
 install_omp(){
     if cmd_exists oh-my-posh;then
         echo "'Oh-My-Posh' is already installed, exiting"
@@ -76,10 +75,10 @@ omp_installer() {
             return 1;
         fi
 
-        if [ ! -f "details.log" ];then touch "details.log";fi
+        if [ ! -f "$SCRIPT_DIR/details.log" ];then touch "$SCRIPT_DIR/details.log";fi
 
-        echo "Install Directory: $INSTALL_DIR" > "details.log"
-        echo "Themes Directory: $THEMES_DIR" >> "details.log"
+        echo "Install Directory: $INSTALL_DIR" > "$SCRIPT_DIR/details.log"
+        echo "Themes Directory: $THEMES_DIR" >> "$SCRIPT_DIR/details.log"
         return 0
     else
         echo "aborting 'Oh-My-Posh' installation"
@@ -161,7 +160,7 @@ uninstall_omp(){
     local app="$INSTALL_DIR/oh-my-posh"
     echo "$app"
     if [ -f "$app" ];then
-        rm -rf "$app" && echo "" > "details.log";return 0
+        rm -rf "$app" && echo "" > "$SCRIPT_DIR/details.log";return 0
     else
         echo "the executable binary couldn't be found !!";return 1
     fi
@@ -238,6 +237,9 @@ apply_theme() {
         echo "$new_line" >> "$HOME/.bashrc";
     fi
 }
+theme_apply_default(){
+    apply_theme 0
+}
 apply_theme_prompt(){
     local cho
     read -p "choose your theme with number: " cho
@@ -253,22 +255,24 @@ menu(){
     if [[ "$line" == "" ]];then enable_info="(not enabled)"; else enable_info="(enabled)"; fi
 
     #clear
-    echo "1. INSTALL oh-my-posh, $info_install"
-    echo "2. enable oh-my-posh on 'bash', $enable_info"
-    echo "3. LIST oh-my-posh themes"
-    echo "4. APPLY oh-my-posh theme"
-    echo "5. UNINSTALL oh-my-posh"
-    echo "z. Exit !!"
+    while true;do
+        echo "1. INSTALL oh-my-posh, $info_install"
+        echo "2. enable oh-my-posh on 'bash', $enable_info"
+        echo "3. LIST oh-my-posh themes"
+        echo "4. APPLY oh-my-posh theme"
+        echo "5. UNINSTALL oh-my-posh"
+        echo "z. Exit !!"
 
-    local cho=""
-    read -p "Select any option (number only): " cho
-      if [[ "$cho" == "1" ]];then omp_installer
-    elif [[ "$cho" == "2" ]];then theme_apply_default
-    elif [[ "$cho" == "3" ]];then list_themes_prompt
-    elif [[ "$cho" == "4" ]];then apply_theme_prompt
-    elif [[ "$cho" == "5" ]];then omp_uninstaller
-    elif [[ "$cho" == "z" ]];then return 0
-    else menu; fi 
+        local cho=""
+        read -p "Select any option (number only): " cho
+        if [[ "$cho" == "1" ]];then omp_installer
+        elif [[ "$cho" == "2" ]];then theme_apply_default
+        elif [[ "$cho" == "3" ]];then list_themes_prompt
+        elif [[ "$cho" == "4" ]];then apply_theme_prompt
+        elif [[ "$cho" == "5" ]];then omp_uninstaller
+        elif [[ "$cho" == "z" ]];then break
+        else menu; fi 
+    done
     #menu
 }
 
