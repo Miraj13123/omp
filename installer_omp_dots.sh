@@ -253,16 +253,19 @@ menu(){
     echo "3. LIST oh-my-posh themes"
     echo "4. APPLY oh-my-posh theme"
     echo "5. UNINSTALL oh-my-posh"
+    echo "z. Exit !!"
 
-    local cho
+    local cho=""
     read -p "Select any option (number only): " cho
 
-      if (("$cho" == 1));then omp_installer
-    elif (("$cho" == 2));then theme_apply_default
-    elif (("$cho" == 3));then list_themes_prompt
-    elif (("$cho" == 4));then apply_theme_prompt
+      if [[ "$cho" == "1" ]];then omp_installer
+    elif [[ "$cho" == "2" ]];then theme_apply_default
+    elif [[ "$cho" == "3" ]];then list_themes_prompt
+    elif [[ "$cho" == "4" ]];then apply_theme_prompt
+    elif [[ "$cho" == "5" ]];then omp_uninstaller
+    elif [[ "$cho" == "z" ]];then return 0
     else menu; fi 
-    menu
+    #menu
 }
 
 #omp_uninstaller
