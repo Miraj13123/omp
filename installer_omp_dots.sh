@@ -81,9 +81,10 @@ omp_installer() {
         echo "Install Directory: $INSTALL_DIR" > "$SCRIPT_DIR/details.log"
         echo "Themes Directory: $THEMES_DIR" >> "$SCRIPT_DIR/details.log"
         local temp=$(grep -E "$INSTALL_DIR" "$HOME/.bashrc")
+        local esc_INSTALL_DIR=$(echo "$INSTALL_DIR" | sed 's/[][\\^$.*+?{}|()/ ]/\\&/g')
         if [[ "$temp" == "" ]];then
             echo appending
-            echo "export PATH=\"\$Path:\$INSTALL_DIR\"" >> "$HOME/.bashrc";
+            echo "export PATH=\"\$Path:$esc_INSTALL_DIR\"" >> "$HOME/.bashrc";
         else
             echo "already included in system path"
         fi
