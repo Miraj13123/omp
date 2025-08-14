@@ -181,6 +181,7 @@ omp_uninstaller() {
 list_themes(){
     echo "$THEME_DIR"
     local JSON_FILES="$THEMES_DIR"/*.json
+    
     if [ -z "${#JSON_FILES[@]}" ];then
         echo "there is no JSON files in dir: $THEMES_DIR"
     else
