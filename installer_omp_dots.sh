@@ -83,7 +83,7 @@ omp_installer() {
         local temp=$(grep -E "$INSTALL_DIR" "$HOME/.bashrc")
         if [[ "$temp" == "" ]];then
             echo appending
-            echo "export PATH=\"\$Path\:\$INSTALL_DIR\"" >> "$HOME/.bashrc";
+            echo "export PATH=\"\$Path:\$INSTALL_DIR\"" >> "$HOME/.bashrc";
         else
             echo "already included in system path"
         fi
