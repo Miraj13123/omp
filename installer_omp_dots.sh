@@ -81,11 +81,11 @@ omp_installer() {
         echo "Install Directory: $INSTALL_DIR" > "$SCRIPT_DIR/details.log"
         echo "Themes Directory: $THEMES_DIR" >> "$SCRIPT_DIR/details.log"
         local temp=$(grep -E "$INSTALL_DIR" "$HOME/.bashrc")
-        if [[ ! "$temp" == "" ]];then
-            echo "already included in system path"
-        else
+        if [[ "$temp" == "" ]];then
             echo appending
-            echo "$INSTALL_DIR" >> "$HOME/.bashrc";
+            echo "export PATH=\"\$Path\:\$INSTALL_DIR\"" >> "$HOME/.bashrc";
+        else
+            echo "already included in system path"
         fi
         return 0
     else
@@ -172,9 +172,8 @@ uninstall_omp(){
         
         local temp=$(grep -E "$INSTALL_DIR" "$HOME/.bashrc")
         if [[ "$temp" == "" ]];then
-            echo "already excluded in system path"
+            echo "already excluded from system path"
         else
-            echo appending
             if sed -i "s|$temp||" "$HOME/.bashrc";then
                 echo "successfull excluded from system path"
                 return 0
