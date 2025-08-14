@@ -12,7 +12,7 @@ else
 fi
 
 INSTALL_DIR=$(cat "$SCRIPT_DIR/details.log" | grep -E "Install Directory: " | awk '{print $NF}')
-INSTALL_DIR="$HOME/.cache/oh-my-posh/themes"
+INSTALL_DIR=$(whereis oh-my-posh | awk '{sub(/^[^:]+: /, ""); sub(/\/[^/]+$/, ""); print}')
 #echo "$INSTALL_DIR"
 
 THEMES_DIR="$HOME/.cache/oh-my-posh/themes"
@@ -81,10 +81,9 @@ omp_installer() {
         echo "Install Directory: $INSTALL_DIR" > "$SCRIPT_DIR/details.log"
         echo "Themes Directory: $THEMES_DIR" >> "$SCRIPT_DIR/details.log"
         local temp=$(grep -E "$INSTALL_DIR" "$HOME/.bashrc")
-        local esc_INSTALL_DIR=$(echo "$INSTALL_DIR" | sed 's/[][\\^$.*+?{}|()/ ]/\\&/g')
         if [[ "$temp" == "" ]];then
             echo appending
-            echo "export PATH=\"\$Path:$esc_INSTALL_DIR\"" >> "$HOME/.bashrc";
+            echo "PATH=\"\$PATH:$INSTALL_DIR\"" >> "$HOME/.bashrc";
         else
             echo "already included in system path"
         fi
@@ -171,11 +170,13 @@ uninstall_omp(){
     if [ -f "$app" ];then
         rm -rf "$app" && echo "" > "$SCRIPT_DIR/details.log";
         
-        local temp=$(grep -E "$INSTALL_DIR" "$HOME/.bashrc")
-        if [[ "$temp" == "" ]];then
+        local themes=$(grep -E "oh-my-posh init bash --config" "$HOME/.bashrc")
+        local road=$(grep -E "$INSTALL_DIR" "$HOME/.bashrc")
+        if [[ "$road" == "" ]];then
             echo "already excluded from system path"
         else
-            if sed -i "s|$temp||" "$HOME/.bashrc";then
+            if sed -i "s|$road||" "$HOME/.bashrc";then
+                sed -i "s|$themes||" "$HOME/.bashrc";
                 echo "successfull excluded from system path"
                 return 0
             else
@@ -192,6 +193,8 @@ uninstall_omp(){
 omp_uninstaller() {
     if prompt_user "Do you want to uninstall 'Oh-My-Posh'?";then
         if uninstall_omp;then echo uninstalled;
+            if rm -rf "$HOME/.cache/oh-my-posh";then echo deleted themes;fi
+
             return 0
         else
             return 1
