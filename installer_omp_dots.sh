@@ -163,6 +163,30 @@ custom_json_install() {
         return 1
     fi
 }
+custom_json_install_prompt(){
+    while true;do
+        local cho=""
+        echo "1. 'Force', replace duplicate files"
+        echo "2. 'Skip', Skip already existing files"
+        echo "3.  To fail if any custom file already exists"
+        echo "[x] exit !!"
+        read -p "Choose any option shown above: " cho
+        case $cho in
+            "x")
+                break
+                ;;
+            "1")
+                custom_json_install force
+                ;;
+            "2")
+                custom_json_install skip
+                ;;
+            "3")
+                custom_json_install
+                ;;
+        esac
+    done
+}
 
 uninstall_omp(){
     local app="$INSTALL_DIR/oh-my-posh"
@@ -290,20 +314,22 @@ menu(){
     while true;do
         echo "1. INSTALL oh-my-posh, $info_install"
         echo "2. enable oh-my-posh on 'bash', $enable_info"
-        echo "3. LIST oh-my-posh themes"
-        echo "4. APPLY oh-my-posh theme"
-        echo "5. UNINSTALL oh-my-posh"
-        echo "z. Exit !!"
+        echo "3. add more custom themes"
+        echo "4. LIST oh-my-posh themes"
+        echo "5. APPLY oh-my-posh theme"
+        echo "6. UNINSTALL oh-my-posh"
+        echo "[x] Exit !!"
 
         local cho=""
         read -p "Select any option (number only): " cho
         if [[ "$cho" == "1" ]];then omp_installer
         elif [[ "$cho" == "2" ]];then theme_apply_default
-        elif [[ "$cho" == "3" ]];then list_themes_prompt
-        elif [[ "$cho" == "4" ]];then apply_theme_prompt
-        elif [[ "$cho" == "5" ]];then omp_uninstaller
-        elif [[ "$cho" == "z" ]];then break
-        else menu; fi 
+        elif [[ "$cho" == "3" ]];then custom_json_install_prompt
+        elif [[ "$cho" == "4" ]];then list_themes_prompt
+        elif [[ "$cho" == "5" ]];then apply_theme_prompt
+        elif [[ "$cho" == "6" ]];then omp_uninstaller
+        elif [[ "$cho" == "x" ]];then break
+        fi 
     done
     #menu
 }
