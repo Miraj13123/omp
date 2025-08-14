@@ -15,7 +15,7 @@ INSTALL_DIR=$(cat "$SCRIPT_DIR/details.log" | grep -E "Install Directory: " | aw
 INSTALL_DIR=$(whereis oh-my-posh | awk '{sub(/^[^:]+: /, ""); sub(/\/[^/]+$/, ""); print}')
 #echo "$INSTALL_DIR"
 
-THEMES_DIR=$(cat "$SCRIPT_DIR/details.log" | grep -E "Themes Directory: " | awk '{print $NF}')
+THEMES_DIR="$HOME/.cache/oh-my-posh/themes"
 #app="$INSTALL_DIR/oh-my-posh"
 #echo "$app"
 
@@ -232,7 +232,11 @@ apply_theme() {
 
     if [[ ! "$line" == "" ]];then
         echo changing
-        sed -i "s#$line#$new_line#" "$HOME/.bashrc";
+        if sed -i "s#$line#$new_line#" "$HOME/.bashrc";then
+            echo "sed success"
+        else
+            echo "sed failed"
+        fi
     else
         echo appending
         echo "$new_line" >> "$HOME/.bashrc";
