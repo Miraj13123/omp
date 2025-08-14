@@ -12,7 +12,7 @@ else
 fi
 
 INSTALL_DIR=$(cat "$SCRIPT_DIR/details.log" | grep -E "Install Directory: " | awk '{print $NF}')
-INSTALL_DIR=$(whereis oh-my-posh | awk '{sub(/^[^:]+: /, ""); sub(/\/[^/]+$/, ""); print}')
+INSTALL_DIR="$HOME/.cache/oh-my-posh/themes"
 #echo "$INSTALL_DIR"
 
 THEMES_DIR="$HOME/.cache/oh-my-posh/themes"
@@ -54,6 +54,7 @@ install_omp(){
     INSTALL_DIR=$(echo "$output" | grep 'Installing oh-my-posh for linux-amd64 in' | awk '{print $NF}')
     THEMES_DIR=$(echo "$output" | grep 'Installing oh-my-posh themes in' | awk '{print $NF}')
 
+
     if cmd_exists oh-my-posh;then
         echo "'Oh-My-Posh' is installed successfully"
         custom_json_install force
@@ -79,6 +80,13 @@ omp_installer() {
 
         echo "Install Directory: $INSTALL_DIR" > "$SCRIPT_DIR/details.log"
         echo "Themes Directory: $THEMES_DIR" >> "$SCRIPT_DIR/details.log"
+        local temp=$(grep -E "$INSTALL_DIR" "$HOME/.bashrc")
+        if [[ ! "$temp" == "" ]];then
+            echo "already included in system path"
+        else
+            echo appending
+            echo "$INSTALL_DIR" >> "$HOME/.bashrc";
+        fi
         return 0
     else
         echo "aborting 'Oh-My-Posh' installation"
@@ -160,7 +168,23 @@ uninstall_omp(){
     local app="$INSTALL_DIR/oh-my-posh"
     echo "$app"
     if [ -f "$app" ];then
-        rm -rf "$app" && echo "" > "$SCRIPT_DIR/details.log";return 0
+        rm -rf "$app" && echo "" > "$SCRIPT_DIR/details.log";
+        
+        local temp=$(grep -E "$INSTALL_DIR" "$HOME/.bashrc")
+        if [[ "$temp" == "" ]];then
+            echo "already excluded in system path"
+        else
+            echo appending
+            if sed -i "s|$temp||" "$HOME/.bashrc";then
+                echo "successfull excluded from system path"
+                return 0
+            else
+                echo "failed to exclude from system path"
+                return 1
+            fi
+        
+        fi
+        return 0
     else
         echo "the executable binary couldn't be found !!";return 1
     fi
